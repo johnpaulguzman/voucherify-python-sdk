@@ -38,3 +38,11 @@ def test_customerCRUD():
     voucherify.customers.delete(updatedCustomer.get('id'))
     result = voucherify.customers.get(updatedCustomer.get('id'))
     assert result.get('code') == 404
+# list
+    filter_params = {
+        "limit": 1,
+        "page": 1
+    }
+    customersList = voucherify.customers.list(query=filter_params)
+    assert customersList.get('data_ref') == 'customers'
+    assert isinstance(customersList.get('customers'), list)
