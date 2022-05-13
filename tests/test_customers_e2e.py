@@ -18,9 +18,8 @@ def test_customerCRUD():
             "lang": "en"
         }
     }
-
-    result = voucherify.customers.create(payload)
 # create
+    result = voucherify.customers.create(payload)
     assert result.get('description') == payload.get('description')
     assert result.get('email') == payload.get('email')
 # retrieve
@@ -41,7 +40,7 @@ def test_customerCRUD():
 # list
     filter_params = {
         "limit": 1,
-        "page": 1
+        "page": 1,
     }
     customersList = voucherify.customers.list(query=filter_params)
     assert customersList.get('data_ref') == 'customers'

@@ -25,7 +25,6 @@ class VoucherifyRequest(object):
     def request(self, path, method='GET', **kwargs):
         try:
             url = self.url + path
-
             response = requests.request(
                 method=method,
                 url=url,
@@ -49,26 +48,18 @@ class VoucherifyRequest(object):
 class Vouchers(VoucherifyRequest):
     def __init__(self, *args, **kwargs):
         super(Vouchers, self).__init__(*args, **kwargs)
+        self.base_path = "/vouchers/"
 
     def list(self, query):
-        path = '/vouchers/'
-
-        return self.request(
-            path,
-            params=query
-        )
+        return self.request(self.base_path, params=query)
 
     def get(self, code):
-        path = '/vouchers/' + quote(code)
-
-        return self.request(
-            path
-        )
+        path = self.base_path + quote(code)
+        return self.request(path)
 
     def create(self, voucher):
         code = voucher.get('code', '')
-        path = '/vouchers/' + quote(code)
-
+        path = self.base_path + quote(code)
         return self.request(
             path,
             data=json.dumps(voucher),
@@ -76,8 +67,7 @@ class Vouchers(VoucherifyRequest):
         )
 
     def update(self, voucher_update):
-        path = '/vouchers/' + quote(voucher_update.get("code"))
-
+        path = self.base_path + quote(voucher_update.get('code'))
         return self.request(
             path,
             data=json.dumps(voucher_update),
@@ -85,46 +75,34 @@ class Vouchers(VoucherifyRequest):
         )
 
     def enable(self, code):
-        path = '/vouchers/' + quote(code) + '/enable'
-
-        return self.request(
-            path,
-            method='POST'
-        )
+        path = self.base_path + quote(code) + "/enable"
+        return self.request(path, method='POST')
 
     def disable(self, code):
-        path = '/vouchers/' + quote(code) + '/disable'
-
-        return self.request(
-            path,
-            method='POST'
-        )
+        path = self.base_path + quote(code) + "/disable"
+        return self.request(path, method='POST')
 
     def releaseValidationSession(self, code, sessionKey):
-        path = '/vouchers/' + quote(code) + '/sessions/' + quote(sessionKey)
-
-        return self.request(
-            path,
-            method='DELETE'
-        )
+        path = self.base_path + quote(code) + '/sessions/' + quote(sessionKey)
+        return self.request(path, method='DELETE')
 
 
 class Redemptions(VoucherifyRequest):
     def __init__(self, *args, **kwargs):
         super(Redemptions, self).__init__(*args, **kwargs)
+        self.base_path = "/redemptions/"
 
     def redeem(self, code, tracking_id=None):
         context = {}
-
         if code and isinstance(code, dict):
             context = code
             code = context['voucher']
             del context['voucher']
 
-        path = '/vouchers/' + quote(code) + '/redemption'
+        path = "/vouchers/" + quote(code) + "/redemption"
 
         if tracking_id:
-            path = path + '?' + urlencode({'tracking_id': tracking_id})
+            path = path + "?" + urlencode({'tracking_id': tracking_id})
 
         return self.request(
             path,
@@ -133,48 +111,34 @@ class Redemptions(VoucherifyRequest):
         )
 
     def redeemStackable(self, params):
-        path = '/redemptions'
-        
         return self.request(
-            path,
+            self.base_path,
             method='POST',
             data=json.dumps(params)
         )
 
     def getForVoucher(self, code):
         path = '/vouchers/' + quote(code) + '/redemption'
-
-        return self.request(
-            path
-        )
+        return self.request(path)
 
     def list(self, query):
-        path = '/redemptions'
-
-        return self.request(
-            path,
-            params=query
-        )
+        return self.request(self.base_path, params=query)
 
     def rollback(self, redemption_id, reason=None):
-        path = '/redemptions/' + redemption_id + '/rollback'
-
+        path = self.base_path + redemption_id + "/rollback"
         if reason:
-            path = path + '?' + urlencode({'reason': reason})
+            path = path + "?" + urlencode({'reason': reason})
 
-        return self.request(
-            path,
-            method='POST'
-        )
+        return self.request(path, method='POST')
 
 
 class Validations(VoucherifyRequest):
     def __init__(self, *args, **kwargs):
         super(Validations, self).__init__(*args, **kwargs)
+        self.base_path = "/validations/"
 
     def validateVoucher(self, code, params):
         path = '/vouchers/' + quote(code) + '/validate'
-
         return self.request(
             path,
             method='POST',
@@ -182,10 +146,8 @@ class Validations(VoucherifyRequest):
         )
 
     def validateStackable(self, params):
-        path = '/validations'
-
         return self.request(
-            path,
+            self.base_path,
             method='POST',
             data=json.dumps(params)
         )
@@ -197,7 +159,6 @@ class Distributions(VoucherifyRequest):
 
     def publish(self, params):
         path = '/vouchers/publish'
-
         return self.request(
             path,
             method='POST',
@@ -208,26 +169,21 @@ class Distributions(VoucherifyRequest):
 class Customers(VoucherifyRequest):
     def __init__(self, *args, **kwargs):
         super(Customers, self).__init__(*args, **kwargs)
+        self.base_path = "/customers/"
 
     def create(self, customer):
-        path = '/customers/'
-
         return self.request(
-            path,
+            self.base_path,
             data=json.dumps(customer),
             method='POST'
         )
 
     def get(self, customer_id):
-        path = '/customers/' + quote(customer_id)
-
-        return self.request(
-            path
-        )
+        path = self.base_path + quote(customer_id)
+        return self.request(path)
 
     def update(self, customer):
-        path = '/customers/' + quote(customer.get('id'))
-
+        path = self.base_path + quote(customer.get('id'))
         return self.request(
             path,
             data=json.dumps(customer),
@@ -235,45 +191,31 @@ class Customers(VoucherifyRequest):
         )
 
     def delete(self, customer_id):
-        path = '/customers/' + quote(customer_id)
-
-        return self.request(
-            path,
-            method='DELETE'
-        )
+        path = self.base_path + quote(customer_id)
+        return self.request(path, method='DELETE')
 
     def list(self, query):
-        path = '/customers'
-
-        return self.request(
-            path,
-            params=query
-        )
+        return self.request(self.base_path, params=query)
 
 
 class Orders(VoucherifyRequest):
     def __init__(self, *args, **kwargs):
         super(Orders, self).__init__(*args, **kwargs)
+        self.base_path = "/orders/"
 
     def create(self, order):
-        path = '/orders/'
-
         return self.request(
-            path,
+            self.base_path,
             data=json.dumps(order),
             method='POST'
         )
 
     def get(self, order_id):
-        path = '/orders/' + quote(order_id)
-
-        return self.request(
-            path
-        )
+        path = self.base_path + quote(order_id)
+        return self.request(path)
 
     def update(self, order):
-        path = '/orders/' + quote(order.get('id'))
-
+        path = self.base_path + quote(order.get('id'))
         return self.request(
             path,
             data=json.dumps(order),
@@ -281,12 +223,35 @@ class Orders(VoucherifyRequest):
         )
 
     def list(self, query):
-        path = '/orders'
+        return self.request(self.base_path, params=query)
 
+
+class Products(VoucherifyRequest):
+    def __init__(self, *args, **kwargs):
+        super(Products, self).__init__(*args, **kwargs)
+        self.base_path = "/products/"
+
+    def create(self, products):
+        return self.request(
+            self.base_path,
+            data=json.dumps(products),
+            method='POST'
+        )
+
+    def get(self, products_id):
+        path = self.base_path + quote(products_id)
+        return self.request(path)
+
+    def update(self, products):
+        path = self.base_path + quote(products.get('id'))
         return self.request(
             path,
-            params=query
+            data=json.dumps(products),
+            method='PUT'
         )
+
+    def list(self, query):
+        return self.request(self.base_path, params=query)
 
 
 class Client(VoucherifyRequest):
@@ -298,6 +263,7 @@ class Client(VoucherifyRequest):
         self.validations = Validations(*args, **kwargs)
         self.distributions = Distributions(*args, **kwargs)
         self.orders = Orders(*args, **kwargs)
+        self.products = Products(*args, **kwargs)
 
 
 class VoucherifyError(Exception):

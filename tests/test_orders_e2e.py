@@ -25,8 +25,8 @@ def test_orderCRUD():
         "items": [{"product_id": "prod_083e98e0aa861107bb", "quantity": 1}],
         "metadata": {"payment_mean": ["credit-card"]},
     }
-    result = voucherify.orders.create(payload)
 # create
+    result = voucherify.orders.create(payload)
     assert result.get('description') == payload.get('description')
     assert result.get('email') == payload.get('email')
 # retrieve
@@ -43,7 +43,7 @@ def test_orderCRUD():
 # list
     filter_params = {
         "limit": 1,
-        "page": 1
+        "page": 1,
     }
     ordersList = voucherify.orders.list(query=filter_params)
     assert ordersList.get('data_ref') == 'orders'
