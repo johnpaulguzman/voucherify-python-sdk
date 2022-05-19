@@ -2,9 +2,8 @@ import requests
 import json
 
 try:
-    from urllib.parse import urlencode, quote
+    from urllib.parse import quote
 except ImportError:
-    from urllib import urlencode
     from urllib import quote
 
 ENDPOINT_URL = 'https://api.voucherify.io'
@@ -101,13 +100,15 @@ class Redemptions(VoucherifyRequest):
 
         path = "/vouchers/" + quote(code) + "/redemption"
 
+        params = {}
         if tracking_id:
-            path = path + "?" + urlencode({'tracking_id': tracking_id})
+            params['tracking_id'] = tracking_id
 
         return self.request(
             path,
             method='POST',
             data=json.dumps(context),
+            params=params,
         )
 
     def redeemStackable(self, params):
@@ -124,12 +125,20 @@ class Redemptions(VoucherifyRequest):
     def list(self, query):
         return self.request(self.base_path, params=query)
 
-    def rollback(self, redemption_id, reason=None):
+    def rollback(self, redemption_id, reason=None, data=None):
         path = self.base_path + redemption_id + "/rollback"
-        if reason:
-            path = path + "?" + urlencode({'reason': reason})
 
-        return self.request(path, method='POST')
+        data = {} if data is None else data
+        params = {}
+        if reason:
+            params['reason'] = reason
+
+        return self.request(
+            path,
+            method='POST',
+            data=json.dumps(data),
+            params=params
+        )
 
 
 class Validations(VoucherifyRequest):
