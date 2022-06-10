@@ -263,6 +263,42 @@ class Products(VoucherifyRequest):
         return self.request(self.base_path, params=query)
 
 
+class ValidationRules(VoucherifyRequest):
+    def __init__(self, *args, **kwargs):
+        super(ValidationRules, self).__init__(*args, **kwargs)
+        self.base_path = "/validation-rules/"
+
+    def create(self, validation_rule):
+        return self.request(
+            self.base_path,
+            data=json.dumps(validation_rule),
+            method='POST'
+        )
+
+    def get(self, validation_rule_id):
+        path = self.base_path + quote(validation_rule_id)
+        return self.request(path)
+
+    def update(self, validation_rule):
+        path = self.base_path + quote(validation_rule.get('id'))
+        return self.request(
+            path,
+            data=json.dumps(validation_rule),
+            method='PUT'
+        )
+
+    def list(self, query):
+        return self.request(self.base_path, params=query)
+
+    def assign(self, validation_rule_id, assignee_payload):
+        path = self.base_path + quote(validation_rule_id) + "/assignments"
+        return self.request(
+            path,
+            data=json.dumps(assignee_payload),
+            method='POST'
+        )
+
+
 class Client(VoucherifyRequest):
     def __init__(self, *args, **kwargs):
         super(Client, self).__init__(*args, **kwargs)
@@ -273,6 +309,7 @@ class Client(VoucherifyRequest):
         self.distributions = Distributions(*args, **kwargs)
         self.orders = Orders(*args, **kwargs)
         self.products = Products(*args, **kwargs)
+        self.validation_rules = ValidationRules(*args, **kwargs)
 
 
 class VoucherifyError(Exception):

@@ -64,7 +64,7 @@ client = voucherifyClient(
 This SDK is consistent with restful API Voucherify provides.
 Not all API methods are currently supported in this SDK, but they are coming soon.
 
-You will find detailed description and example responses at [official docs](https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq).
+You will find detailed description and example responses at [official docs](https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq) and [Postman test cases](https://docs.voucherify.io/docs/examples#section-postman-test-cases)
 Method headers point to more detailed descriptions of params you can use.
 
 ### Vouchers API
