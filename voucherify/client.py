@@ -11,7 +11,8 @@ TIMEOUT = 180
 
 
 class VoucherifyRequest(object):
-    def __init__(self, application_id, client_secret_key, api_endpoint=None, timeout=TIMEOUT):
+    def __init__(self, application_id, client_secret_key, api_endpoint=None, timeout=TIMEOUT, strict=False):
+        self.strict = strict
         self.timeout = timeout
         self.url = (api_endpoint if api_endpoint else ENDPOINT_URL) + "/v1"
         self.headers = {
@@ -21,7 +22,7 @@ class VoucherifyRequest(object):
             'Content-Type': 'application/json'
         }
 
-    def request(self, path, method='GET', **kwargs):
+    def request(self, path, method='GET', strict=None, **kwargs):
         try:
             url = self.url + path
             response = requests.request(
@@ -31,10 +32,13 @@ class VoucherifyRequest(object):
                 timeout=self.timeout,
                 **kwargs
             )
-        except requests.HTTPError as e:
-            response = json.loads(e.read())
-        except requests.ConnectionError as e:
-            raise VoucherifyError(e)
+            response.raise_for_status()
+        except (requests.HTTPError, requests.ConnectionError) as e:
+            voucherify_error = VoucherifyError(e)
+            raise_exception = strict if strict is not None else self.strict
+            if raise_exception:
+                raise voucherify_error
+            return voucherify_error.body
 
         if response.headers.get('content-type') and 'json' in response.headers['content-type']:
             result = response.json()
@@ -49,41 +53,43 @@ class Vouchers(VoucherifyRequest):
         super(Vouchers, self).__init__(*args, **kwargs)
         self.base_path = "/vouchers/"
 
-    def list(self, query):
-        return self.request(self.base_path, params=query)
+    def list(self, query, **kwargs):
+        return self.request(self.base_path, params=query, **kwargs)
 
-    def get(self, code):
+    def get(self, code, **kwargs):
         path = self.base_path + quote(code)
-        return self.request(path)
+        return self.request(path, **kwargs)
 
-    def create(self, voucher):
+    def create(self, voucher, **kwargs):
         code = voucher.get('code', '')
         path = self.base_path + quote(code)
         return self.request(
             path,
             data=json.dumps(voucher),
-            method='POST'
+            method='POST',
+            **kwargs
         )
 
-    def update(self, voucher_update):
+    def update(self, voucher_update, **kwargs):
         path = self.base_path + quote(voucher_update.get('code'))
         return self.request(
             path,
             data=json.dumps(voucher_update),
-            method='PUT'
+            method='PUT',
+            **kwargs
         )
 
-    def enable(self, code):
+    def enable(self, code, **kwargs):
         path = self.base_path + quote(code) + "/enable"
-        return self.request(path, method='POST')
+        return self.request(path, method='POST', **kwargs)
 
-    def disable(self, code):
+    def disable(self, code, **kwargs):
         path = self.base_path + quote(code) + "/disable"
-        return self.request(path, method='POST')
+        return self.request(path, method='POST', **kwargs)
 
-    def releaseValidationSession(self, code, sessionKey):
+    def releaseValidationSession(self, code, sessionKey, **kwargs):
         path = self.base_path + quote(code) + '/sessions/' + quote(sessionKey)
-        return self.request(path, method='DELETE')
+        return self.request(path, method='DELETE', **kwargs)
 
 
 class Redemptions(VoucherifyRequest):
@@ -91,7 +97,7 @@ class Redemptions(VoucherifyRequest):
         super(Redemptions, self).__init__(*args, **kwargs)
         self.base_path = "/redemptions/"
 
-    def redeem(self, code, tracking_id=None):
+    def redeem(self, code, tracking_id=None, **kwargs):
         context = {}
         if code and isinstance(code, dict):
             context = code
@@ -109,23 +115,25 @@ class Redemptions(VoucherifyRequest):
             method='POST',
             data=json.dumps(context),
             params=params,
+            **kwargs
         )
 
-    def redeemStackable(self, params):
+    def redeemStackable(self, params, **kwargs):
         return self.request(
             self.base_path,
             method='POST',
-            data=json.dumps(params)
+            data=json.dumps(params),
+            **kwargs
         )
 
-    def getForVoucher(self, code):
+    def getForVoucher(self, code, **kwargs):
         path = '/vouchers/' + quote(code) + '/redemption'
-        return self.request(path)
+        return self.request(path, **kwargs)
 
-    def list(self, query):
-        return self.request(self.base_path, params=query)
+    def list(self, query, **kwargs):
+        return self.request(self.base_path, params=query, **kwargs)
 
-    def rollback(self, redemption_id, reason=None, data=None):
+    def rollback(self, redemption_id, reason=None, data=None, **kwargs):
         path = self.base_path + redemption_id + "/rollback"
 
         data = {} if data is None else data
@@ -137,7 +145,8 @@ class Redemptions(VoucherifyRequest):
             path,
             method='POST',
             data=json.dumps(data),
-            params=params
+            params=params,
+            **kwargs
         )
 
 
@@ -146,19 +155,21 @@ class Validations(VoucherifyRequest):
         super(Validations, self).__init__(*args, **kwargs)
         self.base_path = "/validations/"
 
-    def validateVoucher(self, code, params):
+    def validateVoucher(self, code, params, **kwargs):
         path = '/vouchers/' + quote(code) + '/validate'
         return self.request(
             path,
             method='POST',
             data=json.dumps(params),
+            **kwargs
         )
 
-    def validateStackable(self, params):
+    def validateStackable(self, params, **kwargs):
         return self.request(
             self.base_path,
             method='POST',
-            data=json.dumps(params)
+            data=json.dumps(params),
+            **kwargs
         )
 
 
@@ -166,12 +177,13 @@ class Distributions(VoucherifyRequest):
     def __init__(self, *args, **kwargs):
         super(Distributions, self).__init__(*args, **kwargs)
 
-    def publish(self, params):
+    def publish(self, params, **kwargs):
         path = '/vouchers/publish'
         return self.request(
             path,
             method='POST',
-            data=json.dumps(params)
+            data=json.dumps(params),
+            **kwargs
         )
 
 
@@ -180,31 +192,33 @@ class Customers(VoucherifyRequest):
         super(Customers, self).__init__(*args, **kwargs)
         self.base_path = "/customers/"
 
-    def create(self, customer):
+    def create(self, customer, **kwargs):
         return self.request(
             self.base_path,
             data=json.dumps(customer),
-            method='POST'
+            method='POST',
+            **kwargs
         )
 
-    def get(self, customer_id):
+    def get(self, customer_id, **kwargs):
         path = self.base_path + quote(customer_id)
-        return self.request(path)
+        return self.request(path, **kwargs)
 
-    def update(self, customer):
+    def update(self, customer, **kwargs):
         path = self.base_path + quote(customer.get('id'))
         return self.request(
             path,
             data=json.dumps(customer),
-            method='PUT'
+            method='PUT',
+            **kwargs
         )
 
-    def delete(self, customer_id):
+    def delete(self, customer_id, **kwargs):
         path = self.base_path + quote(customer_id)
-        return self.request(path, method='DELETE')
+        return self.request(path, method='DELETE', **kwargs)
 
-    def list(self, query):
-        return self.request(self.base_path, params=query)
+    def list(self, query, **kwargs):
+        return self.request(self.base_path, params=query, **kwargs)
 
 
 class Orders(VoucherifyRequest):
@@ -212,27 +226,29 @@ class Orders(VoucherifyRequest):
         super(Orders, self).__init__(*args, **kwargs)
         self.base_path = "/orders/"
 
-    def create(self, order):
+    def create(self, order, **kwargs):
         return self.request(
             self.base_path,
             data=json.dumps(order),
-            method='POST'
+            method='POST',
+            **kwargs
         )
 
-    def get(self, order_id):
+    def get(self, order_id, **kwargs):
         path = self.base_path + quote(order_id)
-        return self.request(path)
+        return self.request(path, **kwargs)
 
-    def update(self, order):
+    def update(self, order, **kwargs):
         path = self.base_path + quote(order.get('id'))
         return self.request(
             path,
             data=json.dumps(order),
-            method='PUT'
+            method='PUT',
+            **kwargs
         )
 
-    def list(self, query):
-        return self.request(self.base_path, params=query)
+    def list(self, query, **kwargs):
+        return self.request(self.base_path, params=query, **kwargs)
 
 
 class Products(VoucherifyRequest):
@@ -240,27 +256,29 @@ class Products(VoucherifyRequest):
         super(Products, self).__init__(*args, **kwargs)
         self.base_path = "/products/"
 
-    def create(self, products):
+    def create(self, products, **kwargs):
         return self.request(
             self.base_path,
             data=json.dumps(products),
-            method='POST'
+            method='POST',
+            **kwargs
         )
 
-    def get(self, products_id):
+    def get(self, products_id, **kwargs):
         path = self.base_path + quote(products_id)
-        return self.request(path)
+        return self.request(path, **kwargs)
 
-    def update(self, products):
+    def update(self, products, **kwargs):
         path = self.base_path + quote(products.get('id'))
         return self.request(
             path,
             data=json.dumps(products),
-            method='PUT'
+            method='PUT',
+            **kwargs
         )
 
-    def list(self, query):
-        return self.request(self.base_path, params=query)
+    def list(self, query, **kwargs):
+        return self.request(self.base_path, params=query, **kwargs)
 
 
 class ValidationRules(VoucherifyRequest):
@@ -268,34 +286,37 @@ class ValidationRules(VoucherifyRequest):
         super(ValidationRules, self).__init__(*args, **kwargs)
         self.base_path = "/validation-rules/"
 
-    def create(self, validation_rule):
+    def create(self, validation_rule, **kwargs):
         return self.request(
             self.base_path,
             data=json.dumps(validation_rule),
-            method='POST'
+            method='POST',
+            **kwargs
         )
 
-    def get(self, validation_rule_id):
+    def get(self, validation_rule_id, **kwargs):
         path = self.base_path + quote(validation_rule_id)
-        return self.request(path)
+        return self.request(path, **kwargs)
 
-    def update(self, validation_rule):
+    def update(self, validation_rule, **kwargs):
         path = self.base_path + quote(validation_rule.get('id'))
         return self.request(
             path,
             data=json.dumps(validation_rule),
-            method='PUT'
+            method='PUT',
+            **kwargs
         )
 
-    def list(self, query):
-        return self.request(self.base_path, params=query)
+    def list(self, query, **kwargs):
+        return self.request(self.base_path, params=query, **kwargs)
 
-    def assign(self, validation_rule_id, assignee_payload):
+    def assign(self, validation_rule_id, assignee_payload, **kwargs):
         path = self.base_path + quote(validation_rule_id) + "/assignments"
         return self.request(
             path,
             data=json.dumps(assignee_payload),
-            method='POST'
+            method='POST',
+            **kwargs
         )
 
 
@@ -313,18 +334,18 @@ class Client(VoucherifyRequest):
 
 
 class VoucherifyError(Exception):
-    def __init__(self, result):
-        self.result = result
-        self.code = None
-        self.message = None
-
-        try:
-            self.type = result['error_code']
-            self.message = result['error_msg']
-        except:
-            self.type = ''
-            self.message = result
-
+    def __init__(self, request_exception):
+        self._e = request_exception
+        self._request = request_exception.request
+        self._response = request_exception.response
+        if self._response is not None:
+            self.body = self._response.json()
+            self.code = self.body.get('code')
+            self.message = self.body.get('message')
+        else:
+            self.code = None
+            self.message = repr(self._e)
+            self.body = {'message': self.message}
         Exception.__init__(self, self.message)
 
 
