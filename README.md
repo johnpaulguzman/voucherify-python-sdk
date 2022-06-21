@@ -64,7 +64,7 @@ client = voucherifyClient(
 This SDK is consistent with restful API Voucherify provides.
 Not all API methods are currently supported in this SDK, but they are coming soon.
 
-You will find detailed description and example responses at [official docs](https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq).
+You will find detailed description and example responses at [official docs](https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq) and [Postman test cases](https://docs.voucherify.io/docs/examples#section-postman-test-cases)
 Method headers point to more detailed descriptions of params you can use.
 
 ### Vouchers API
@@ -179,12 +179,13 @@ Methods are provided within `client.customers.*` namespace.
 - [Get Customer](#get-customer)
 - [Update Customer](#update-customer)
 - [Delete Customer](#delete-customer)
+- [List Customers](#list-customers)
 
 #### [Create Customer]
 ```python
 client.customers.create(customer)
 ```
-Check [customer object](https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#the-customer-object).
+Check [customer object](https://docs.voucherify.io/reference/the-customer-object?utm_source=github&utm_medium=sdk&utm_campaign=acq).
 #### [Get Customer]
 ```python
 client.customers.get(customerId)
@@ -198,6 +199,11 @@ client.customers.update(customer)
 #### [Delete Customer]
 ```python
 client.customers.delete(customerId)
+```
+
+#### [List Customers]
+```python
+client.customers.list(params)
 ```
 
 ---
@@ -254,26 +260,27 @@ Bug reports and pull requests are welcome through [GitHub Issues](https://github
   - Voucher operations: *use*
   - Utils
 
-[Create Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#create-voucher
-[Get Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#vouchers-get
-[Update Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#update-voucher
-[List Vouchers]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#list-vouchers
-[Enable Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#enable-voucher
-[Disable Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#disable-voucher
+[Create Voucher]: https://docs.voucherify.io/reference/create-voucher?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Get Voucher]: https://docs.voucherify.io/reference/vouchers-get?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Update Voucher]: https://docs.voucherify.io/reference/update-voucher?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[List Vouchers]: https://docs.voucherify.io/reference/list-vouchers?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Enable Voucher]: https://docs.voucherify.io/reference/enable-voucher?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Disable Voucher]: https://docs.voucherify.io/reference/disable-voucher?utm_source=github&utm_medium=sdk&utm_campaign=acq
 [Release Validation Session]: https://docs.voucherify.io/reference/release-validation-session
 
-[Publish Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#create-publication
+[Publish Voucher]: https://docs.voucherify.io/reference/create-publication?utm_source=github&utm_medium=sdk&utm_campaign=acq
 
-[Validate Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#validate-voucher
+[Validate Voucher]: https://docs.voucherify.io/reference/validate-voucher?utm_source=github&utm_medium=sdk&utm_campaign=acq
 [Validate Stackable]: https://docs.voucherify.io/reference/validate-stacked-discounts-1
 
-[Redeem Voucher]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#redeem-voucher
+[Redeem Voucher]: https://docs.voucherify.io/reference/redeem-voucher?utm_source=github&utm_medium=sdk&utm_campaign=acq
 [Redeem Stackable]: https://docs.voucherify.io/reference/redeem-stacked-discounts
-[List Redemptions]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#list-redemptions
-[Get Voucher's Redemptions]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#vouchers-redemptions
-[Rollback Redemption]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#rollback-redemption
+[List Redemptions]: https://docs.voucherify.io/reference/list-redemptions?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Get Voucher's Redemptions]: https://docs.voucherify.io/reference/vouchers-redemptions?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Rollback Redemption]: https://docs.voucherify.io/reference/rollback-redemption?utm_source=github&utm_medium=sdk&utm_campaign=acq
 
-[Create Customer]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#create-customer
-[Get Customer]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#read-customer
-[Update Customer]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#update-customer
-[Delete Customer]: https://docs.voucherify.io/reference?utm_source=github&utm_medium=sdk&utm_campaign=acq#delete-customer
+[Create Customer]: https://docs.voucherify.io/reference/create-customer?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Get Customer]: https://docs.voucherify.io/reference/read-customer?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Update Customer]: https://docs.voucherify.io/reference/update-customer?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[Delete Customer]: https://docs.voucherify.io/reference/delete-customer?utm_source=github&utm_medium=sdk&utm_campaign=acq
+[List Customers]: https://docs.voucherify.io/reference/list-customers?utm_source=github&utm_medium=sdk&utm_campaign=acq
