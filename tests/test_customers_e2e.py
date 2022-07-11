@@ -1,11 +1,12 @@
-from voucherify import Client as voucherifyClient
+from voucherify import Client as voucherifyClient, VoucherifyError
 
 """
 Initialization
 """
 voucherify = voucherifyClient(
     application_id="c70a6f00-cf91-4756-9df5-47628850002b",
-    client_secret_key="3266b9f8-e246-4f79-bdf0-833929b1380c"
+    client_secret_key="3266b9f8-e246-4f79-bdf0-833929b1380c",
+    strict=True
 )
 
 
@@ -35,7 +36,13 @@ def test_customerCRUD():
     assert updatedCustomer.get('description') == updatePayload.get('description')
 # delete
     voucherify.customers.delete(updatedCustomer.get('id'))
-    result = voucherify.customers.get(updatedCustomer.get('id'))
+    try:
+        voucherify.customers.get(updatedCustomer.get('id'))
+        assert False, "Must throw a not found exception."
+    except VoucherifyError as e:
+        assert e.message == "Resource not found"
+        assert e.code == 404
+    result = voucherify.customers.get(updatedCustomer.get('id'), strict=False)
     assert result.get('code') == 404
 # list
     filter_params = {
